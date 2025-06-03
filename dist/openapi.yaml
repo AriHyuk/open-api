@@ -4,7 +4,7 @@ info:
   description: Dokumentasi endpoint API untuk sistem produk dan transaksi.
   version: 1.0.0
 servers:
-  - url: http://localhost:8000/api
+  - url: https://api.isc-webdev.my.id/api
     description: Server lokal untuk pengembangan
 paths:
   /addproducts:
@@ -19,31 +19,31 @@ paths:
             schema:
               type: object
               required:
-                - product_name
-                - category_id
-                - supplier_id
-                - sale_price
-                - product_description
-                - product_image
+              - product_name
+              - product_description
+              - product_image
+              - sale_price
+              - category_id
+              - supplier_id
               properties:
-                product_name:
-                  type: string
-                  example: "Lenovo ThinkPad"
-                category_id:
-                  type: string
-                  example: "1"
-                supplier_id:
-                  type: string
-                  example: "2"
-                sale_price:
-                  type: string
-                  example: "5799000"
-                product_description:
-                  type: string
-                  example: "test"
-                product_image:
-                  type: string
-                  example: "product_images/YShxARc9G6SSaiu2Ea8lYrXcKstza..."
+               product_name:
+                type: string
+                example: "Lenovo ThinkPad"
+               product_description:
+                type: string
+                example: "Laptop dengan performa tinggi"
+               product_image:
+                type: string
+                example: "product_images/lenovo.jpg"
+               sale_price:
+                type: string
+                example: "5799000"
+               category_id:
+                type: string
+                example: "1"
+               supplier_id:
+                type: string
+                example: "2"
       responses:
         200:
           description: Produk berhasil ditambahkan

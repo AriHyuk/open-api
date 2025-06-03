@@ -4,7 +4,7 @@ info:
   description: Dokumentasi endpoint API untuk sistem produk dan transaksi.
   version: 1.0.0
 servers:
-  - url: https://api.isc-webdev.my.id/api
+  - url: http://localhost:8000/api
     description: Server lokal untuk pengembangan
 paths:
   /addproducts:
@@ -118,15 +118,25 @@ paths:
             schema:
               type: object
               required:
-                - nama
-                - kontak
+               - supplier_name
               properties:
-                nama:
+                supplier_name:
                   type: string
-                  example: "PT Sumber Makmur"
-                kontak:
+                  example: "PT Mencari Cinta Sejati"
+                supplier_address:
                   type: string
-                  example: "082123456789"
+                  example: "Jl. in aja dulu"
+                supplier_email:
+                  type: string
+                  format: email
+                  example: "ariganteng@gmail.com"
+                supplier_contact:
+                  type: string
+                  example: "085893707918"
+                image_path:
+                  type: string
+                  example: "supplier_images/sumber_makmur.jpg"
+                
       responses:
         200:
           description: Supplier berhasil ditambahkan
@@ -314,78 +324,118 @@ paths:
           description: Gagal membuat transaksi
 
   /orders:
-    post:
-      tags:
-        - Order
-      summary: Buat order baru
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - order_id
-                - produk
-              properties:
-                order_id:
-                  type: string
-                  example: "ORD-001"
-                produk:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - id_produk
-                      - jumlah
-                    properties:
-                      id_produk:
-                        type: integer
-                        example: 1
-                      jumlah:
-                        type: integer
-                        example: 2
-      responses:
-        200:
-          description: Order berhasil dibuat
-        400:
-          description: Permintaan tidak valid
-        500:
-          description: Gagal membuat order
+   post:
+    tags:
+      - Order
+    summary: Buat order baru
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - user_id
+              - order_id
+              - order_date
+              - payment_status
+              - payment_method
+              - downpayment
+              - remaining_payment
+              - total_price
+              - updated_by
+              - products
+            properties:
+              user_id:
+                type: integer
+                example: 1
+              order_id:
+                type: string
+                example: "ORD-004"
+              order_date:
+                type: number
+                example: 20240527
+              payment_status:
+                type: string
+                enum:
+                  - paid
+                  - unpaid
+                example: "paid"
+              payment_method:
+                type: string
+                example: "cash"
+              downpayment:
+                type: number
+                example: 50000
+              remaining_payment:
+                type: number
+                example: 25000
+              total_price:
+                type: number
+                example: 75000
+              updated_by:
+                type: string
+                example: "admin"
+              products:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - product_id
+                    - quantity
+                    - price
+                  properties:
+                    product_id:
+                      type: integer
+                      example: 11
+                    quantity:
+                      type: integer
+                      example: 2
+                    price:
+                      type: number
+                      example: 25000
+    responses:
+      200:
+        description: Order berhasil dibuat
+      400:
+        description: Permintaan tidak valid
+      500:
+        description: Gagal membuat order
 
   /orders/{id}:
-    get:
-      tags:
-        - Order
-      summary: Lihat order berdasarkan ID (UUID/string)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Detail order
-        404:
-          description: Order tidak ditemukan
-        500:
-          description: Gagal mengambil data order
+   get:
+    tags:
+      - Order
+    summary: Lihat order berdasarkan ID (UUID/string)
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Detail order
+      404:
+        description: Order tidak ditemukan
+      500:
+        description: Gagal mengambil data order
 
   /orders/by-order-id/{order_id}:
-    get:
-      tags:
-        - Order
-      summary: Lihat order berdasarkan Order ID khusus (seperti ORD-001)
-      parameters:
-        - name: order_id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Detail order berdasarkan Order ID
-        404:
-          description: Order tidak ditemukan
-        500:
-          description: Gagal mengambil data order
+   get:
+    tags:
+      - Order
+    summary: Lihat order berdasarkan Order ID khusus (seperti ORD-001)
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Detail order berdasarkan Order ID
+      404:
+        description: Order tidak ditemukan
+      500:
+        description: Gagal mengambil data order
