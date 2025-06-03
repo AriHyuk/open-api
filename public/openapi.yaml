@@ -4,7 +4,7 @@ info:
   description: Dokumentasi endpoint API untuk sistem produk dan transaksi.
   version: 1.0.0
 servers:
-  - url: http://localhost:8000/api
+  - url: https://api.isc-webdev.my.id/api
     description: Server lokal untuk pengembangan
 paths:
   /addproducts:
