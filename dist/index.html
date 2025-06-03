@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>OpenAPI - POS Application</title>
+
+    <link rel="stylesheet" href="swagger-ui.css" />
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-rUa6gnWw.svg" />
+    <style>
+       body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#auto-login-btn, #edit-login-btn, #refresh-token-btn {
+    z-index: 999;
+    position: fixed;
+    right: 20px;
+    width: auto;
+    min-width: 160px;
+    background-color: #61affe;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#auto-login-btn {
+    top: 20px;
+}
+
+#edit-login-btn {
+    top: 70px;
+}
+
+#refresh-token-btn {
+    top: 120px;
+    background-color: #49cc90;
+}
+
+#auto-login-btn:hover,
+#edit-login-btn:hover,
+#refresh-token-btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal styles */
+#login-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#login-modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px 40px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalShow 0.4s ease-out;
+    position: relative;
+}
+
+@keyframes modalShow {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#close-modal {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #999;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#close-modal:hover {
+    color: #000;
+}
+
+#login-modal-content h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#login-form label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #444;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+    padding: 10px 12px;
+    font-size: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    transition: 0.3s ease;
+}
+
+#login-form input:focus {
+    border-color: #61affe;
+    outline: none;
+    box-shadow: 0 0 4px #61affe88;
+}
+
+#login-form input[type="checkbox"] {
+    width: auto;
+}
+
+#login-form button[type="submit"] {
+    background-color: #61affe;
+    color: white;
+    padding: 10px;
+    border: none;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#login-form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+    </style>
+</head>
+
+<body>
+    <button id="auto-login-btn">Login</button>
+    <button id="edit-login-btn">Edit Data Login</button>
+    <button id="refresh-token-btn">Refresh Token</button>
+
+    <!-- Modal for editing login data -->
+    <div id="login-modal">
+        <div id="login-modal-content">
+            <span id="close-modal">&times;</span>
+            <h2>Edit Login Data</h2>
+            <form id="login-form">
+                <label for="email_or_phone_number">Email/Phone:</label>
+                <input type="text" id="email_or_phone_number" name="email_or_phone_number" value="admin@example.com"><br><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" value="TesPassword123"><br><br>
+                <label for="remember_me">Remember Me:</label>
+                <input type="checkbox" id="remember_me" name="remember_me"><br><br>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = function () {
+          const ui = SwaggerUIBundle({
+              url: "openapi.yaml",
+              dom_id: "#swagger-ui",
+              docExpansion: "none",
+              defaultModelExpandDepth: 10,
+              presets: [
+                  SwaggerUIBundle.presets.apis,
+                  SwaggerUIBundle.SwaggerUIStandalonePreset
+              ],
+              deepLinking: true,
+              requestInterceptor: (req) => {
+                  const token = localStorage.getItem('access_token');
+                  if (token) {
+                      req.headers['Authorization'] = `Bearer ${token}`;
+                  }
+                  return req;
+              },
+          });
+
+          let loginData = {
+              email_or_phone_number: "admin@example.com",
+              password: "TesPassword123",
+              remember_me: false
+          };
+
+          const waitForServersElement = setInterval(() => {
+              const serverSelect = document.querySelector('.servers select');
+              if (serverSelect) {
+                  clearInterval(waitForServersElement);
+
+                  const baseUrl = serverSelect.value;
+                  console.log('Using base URL:', baseUrl);
+
+                  // Auto Login functionality
+                  document.getElementById('auto-login-btn').addEventListener('click', async function () {
+                      try {
+                          const response = await fetch(`${baseUrl}/auth/login`, {
+                              method: 'POST',
+                              headers: {
+                                  'Content-Type': 'application/json',
+                              },
+                              credentials: 'include',
+                              body: JSON.stringify(loginData)
+                          });
+
+                          const result = await response.json();
+
+                          if (result.status) {
+                              console.log('Login successful:', result);
+                              localStorage.setItem('access_token', result.data.access_token);
+
+                              ui.preauthorizeApiKey("BearerAuth", result.data.access_token);
+                          } else {
+                              console.error('Login failed:', result.message);
+                          }
+                      } catch (error) {
+                          console.error('Error during login:', error);
+                      }
+                  });
+
+                  // Refresh Token functionality
+                  document.getElementById('refresh-token-btn').addEventListener('click', async function () {
+                      try {
+                          const response = await fetch(`${baseUrl}/auth/refresh`, {
+                              method: 'POST',
+                              credentials: 'include', // Pastikan cookie dikirim dengan permintaan ini
+                          });
+
+                          const result = await response.json();
+
+                          if (result.status) {
+                              console.log('Token refreshed:', result);
+                              localStorage.setItem('access_token', result.data.access_token);
+
+                              ui.preauthorizeApiKey("BearerAuth", result.data.access_token);
+                          } else {
+                              console.error('Token refresh failed:', result.message);
+                          }
+                      } catch (error) {
+                          console.error('Error during token refresh:', error);
+                      }
+                  });
+              }
+          }, 100); // Cek setiap 100ms
+
+          // Show modal for editing login data
+          const modal = document.getElementById('login-modal');
+          const closeModal = document.getElementById('close-modal');
+          document.getElementById('edit-login-btn').addEventListener('click', function () {
+              modal.style.display = "block";
+          });
+
+          closeModal.addEventListener('click', function () {
+              modal.style.display = "none";
+          });
+
+          // Save updated login data
+          document.getElementById('login-form').addEventListener('submit', function (event) {
+              event.preventDefault();
+              loginData.email_or_phone_number = document.getElementById('email_or_phone_number').value;
+              loginData.password = document.getElementById('password').value;
+              loginData.remember_me = document.getElementById('remember_me').checked;
+
+              console.log('Updated loginData:', loginData);
+              modal.style.display = "none";
+          });
+
+          window.onclick = function (event) {
+              if (event.target == modal) {
+                  modal.style.display = "none";
+              }
+          };
+      };
+    </script>
+</body>
+
+</html>
