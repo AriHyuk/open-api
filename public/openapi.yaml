@@ -1,61 +1,228 @@
-openapi: "3.0.2"
-
+openapi: 3.0.2
 info:
-  title: Template API Documentation
-  description: Manage API endpoints.
-  version: 0.0.1
-
+  title: API Documentation EksCommerce
+  description: Dokumentasi endpoint API untuk sistem produk dan transaksi.
+  version: 1.0.0
 servers:
-  - url: http://localhost:3000
-
+  - url: https://api.isc-webdev.my.id/api
+    description: Server lokal untuk pengembangan
 paths:
-  # Write your own API endpoints
-  /buku:
-    # endpoint GET /buku
-    get:
-      tags:
-        - Buku
-      responses:
-        200:
-          content:
-    # endpoint POST /buku
+  /addproducts:
     post:
       tags:
-        - Buku
+        - Produk
+      summary: Tambah produk baru
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - nama
+                - harga
               properties:
-                judul:
+                nama:
                   type: string
-                  example: "Domain Driven Design"
-                penulis:
-                  type: string
-                  example: "Eric Evans"
+                  example: "Sabun Mandi"
+                harga:
+                  type: number
+                  example: 10000
       responses:
         200:
+          description: Produk berhasil ditambahkan
           content:
-  /buku/{id}:
-    # endpoint GET /buku/{id}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Produk berhasil ditambahkan"
+        400:
+          description: Permintaan tidak valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Data tidak lengkap"
+        500:
+          description: Terjadi kesalahan pada server
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Gagal menambahkan produk karena kesalahan server"
+
+  /customers:
     get:
       tags:
-        - Buku
+        - Pengguna
+      summary: Tampilkan daftar customer
+      responses:
+        200:
+          description: Daftar customer
+        500:
+          description: Gagal mengambil data customer
+
+  /customers/stats:
+    get:
+      tags:
+        - Pengguna
+      summary: Statistik customer
+      responses:
+        200:
+          description: Statistik customer
+        500:
+          description: Gagal mengambil statistik
+
+  /addSuppliers:
+    post:
+      tags:
+        - Supplier
+      summary: Tambah supplier baru
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - kontak
+              properties:
+                nama:
+                  type: string
+                  example: "PT Sumber Makmur"
+                kontak:
+                  type: string
+                  example: "082123456789"
+      responses:
+        200:
+          description: Supplier berhasil ditambahkan
+        400:
+          description: Permintaan tidak valid
+        500:
+          description: Gagal menambahkan supplier
+
+  /viewSuppliers:
+    get:
+      tags:
+        - Supplier
+      summary: Lihat daftar supplier
+      responses:
+        200:
+          description: Daftar supplier
+        500:
+          description: Gagal mengambil data supplier
+
+  /addCategories:
+    post:
+      tags:
+        - Kategori
+      summary: Tambah kategori produk
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+              properties:
+                nama:
+                  type: string
+                  example: "Minuman"
+      responses:
+        200:
+          description: Kategori berhasil ditambahkan
+        400:
+          description: Permintaan tidak valid
+        500:
+          description: Gagal menambahkan kategori
+
+  /viewCategories:
+    get:
+      tags:
+        - Kategori
+      summary: Lihat daftar kategori
+      responses:
+        200:
+          description: Daftar kategori
+        500:
+          description: Gagal mengambil kategori
+
+  /products:
+    get:
+      tags:
+        - Produk
+      summary: Lihat daftar produk
+      responses:
+        200:
+          description: Daftar produk
+        500:
+          description: Gagal mengambil data produk
+
+  /products/details/{id}:
+    get:
+      tags:
+        - Produk
+      summary: Detail produk berdasarkan ID
       parameters:
         - name: id
           in: path
+          required: true
           schema:
             type: integer
       responses:
         200:
-          content:
-    put:
+          description: Detail produk
+        404:
+          description: Produk tidak ditemukan
+        500:
+          description: Gagal mengambil detail produk
+
+  /products/delete/{id}:
+    delete:
       tags:
-        - Buku
+        - Produk
+      summary: Hapus produk berdasarkan ID
       parameters:
         - name: id
           in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Produk berhasil dihapus
+        404:
+          description: Produk tidak ditemukan
+        500:
+          description: Gagal menghapus produk
+
+  /products/stock/{id}:
+    post:
+      tags:
+        - Produk
+      summary: Tambah stok produk
+      parameters:
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
       requestBody:
@@ -63,21 +230,146 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - jumlah
               properties:
-                judul:
-                  type: string
-                  example: "Domain-Driven Design: Tackling Complexity in the Heart of Software"
-                penulis:
-                  type: string
-                  example: "Eric Evans"
+                jumlah:
+                  type: integer
+                  example: 50
       responses:
         200:
-          content:
-    delete:
+          description: Stok berhasil ditambahkan
+        400:
+          description: Permintaan tidak valid
+        500:
+          description: Gagal menambahkan stok
+
+  /products/variant/{id}:
+    post:
       tags:
-        - Buku
+        - Produk
+      summary: Tambah varian produk
       parameters:
         - name: id
           in: path
+          required: true
           schema:
             type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - warna
+                - ukuran
+              properties:
+                warna:
+                  type: string
+                  example: "Merah"
+                ukuran:
+                  type: string
+                  example: "L"
+      responses:
+        200:
+          description: Varian berhasil ditambahkan
+        400:
+          description: Permintaan tidak valid
+        500:
+          description: Gagal menambahkan varian
+
+  /transaction/checkout/{id}:
+    post:
+      tags:
+        - Transaksi
+      summary: Checkout transaksi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Transaksi berhasil dibuat
+        400:
+          description: Permintaan tidak valid
+        500:
+          description: Gagal membuat transaksi
+
+  /orders:
+    post:
+      tags:
+        - Order
+      summary: Buat order baru
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - order_id
+                - produk
+              properties:
+                order_id:
+                  type: string
+                  example: "ORD-001"
+                produk:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id_produk
+                      - jumlah
+                    properties:
+                      id_produk:
+                        type: integer
+                        example: 1
+                      jumlah:
+                        type: integer
+                        example: 2
+      responses:
+        200:
+          description: Order berhasil dibuat
+        400:
+          description: Permintaan tidak valid
+        500:
+          description: Gagal membuat order
+
+  /orders/{id}:
+    get:
+      tags:
+        - Order
+      summary: Lihat order berdasarkan ID (UUID/string)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Detail order
+        404:
+          description: Order tidak ditemukan
+        500:
+          description: Gagal mengambil data order
+
+  /orders/by-order-id/{order_id}:
+    get:
+      tags:
+        - Order
+      summary: Lihat order berdasarkan Order ID khusus (seperti ORD-001)
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Detail order berdasarkan Order ID
+        404:
+          description: Order tidak ditemukan
+        500:
+          description: Gagal mengambil data order
